@@ -144,9 +144,9 @@
 }
 
 .wb-tag-chip.active {
-    background: var(--SmartThemeBodyText);
-    color: var(--SmartThemeBlurTintColor);
-    border-color: var(--SmartThemeBodyText);
+    background: #ffffff;
+    color: #1a1a1a;
+    border-color: #ffffff;
     font-weight: 600;
 }
 
@@ -290,9 +290,9 @@
 }
 
 .wb-btn-primary {
-    background: var(--SmartThemeBodyText);
+    background: #ffffff;
     color: #1a1a1a;
-    border: 2px solid var(--SmartThemeBodyText);
+    border: 2px solid #ffffff;
 }
 
 .wb-btn-primary:hover {
