@@ -85,11 +85,11 @@ const UI = {
     },
 
     // 找到按鈕容器
-    findButtonContainer() {
-        // 尋找「選擇編輯」按鈕所在的容器
-        const container = document.querySelector('#WorldInfo .justifyLeft');
-        return container;
-    },
+findButtonContainer() {
+    // 找到「新增」按鈕,取它的父容器
+    const createBtn = document.querySelector('#world_create_button');
+    return createBtn ? createBtn.parentElement : null;
+},
 
     injectButtons() {
         const container = this.findButtonContainer();
