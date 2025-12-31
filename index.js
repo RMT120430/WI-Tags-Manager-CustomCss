@@ -109,7 +109,8 @@ const TagStorage = {
 const UI = {
     state: {
         activeFilters: new Set(), // 當前啟用的標籤篩選
-        originalOptions: [] // 保存原始的選項列表
+        originalOptions: [], // 保存原始的選項列表
+        selectedWorldbooks: new Set() // 批量操作：選中的世界書
     },
 
     init() {
@@ -304,6 +305,9 @@ findButtonContainer() {
         const old = document.getElementById('wb-manage-modal');
         if (old) old.remove();
 
+        // 重置選中狀態
+        this.state.selectedWorldbooks.clear();
+
         const overlay = document.createElement('div');
         overlay.id = 'wb-manage-modal';
         overlay.className = 'wb-tag-overlay';
@@ -316,6 +320,28 @@ findButtonContainer() {
                 </div>
                 <div class="wb-tag-body">
                     <input type="text" class="wb-tag-search" placeholder="🔍 搜尋世界書..." id="wb-manage-search">
+
+                    <!-- 批量操作工具栏 -->
+                    <div class="wb-bulk-toolbar" id="wb-bulk-toolbar" style="display: none;">
+                        <div class="wb-bulk-info">
+                            <span id="wb-bulk-count">已選擇 0 項</span>
+                        </div>
+                        <div class="wb-bulk-actions">
+                            <button class="wb-btn-small" id="wb-select-all" title="全選">
+                                <i class="fa-solid fa-check-double"></i> 全選
+                            </button>
+                            <button class="wb-btn-small" id="wb-deselect-all" title="取消全選">
+                                <i class="fa-solid fa-times"></i> 取消
+                            </button>
+                            <button class="wb-btn-small wb-btn-primary-small" id="wb-bulk-add-tag" title="批量添加標籤">
+                                <i class="fa-solid fa-plus"></i> 添加標籤
+                            </button>
+                            <button class="wb-btn-small wb-btn-danger-small" id="wb-bulk-remove-tag" title="批量刪除標籤">
+                                <i class="fa-solid fa-trash"></i> 刪除標籤
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="wb-manage-list" id="wb-manage-list"></div>
                     <div class="wb-tag-actions">
                         <button class="wb-btn-primary" id="wb-manage-done">完成</button>
@@ -337,6 +363,12 @@ findButtonContainer() {
         overlay.querySelector('#wb-manage-search').addEventListener('input', (e) => {
             this.renderManageList(e.target.value.toLowerCase());
         });
+
+        // 批量操作按鈕
+        overlay.querySelector('#wb-select-all').addEventListener('click', () => this.selectAllWorldbooks());
+        overlay.querySelector('#wb-deselect-all').addEventListener('click', () => this.deselectAllWorldbooks());
+        overlay.querySelector('#wb-bulk-add-tag').addEventListener('click', () => this.bulkAddTag());
+        overlay.querySelector('#wb-bulk-remove-tag').addEventListener('click', () => this.bulkRemoveTag());
 
         // 初始渲染
         this.renderManageList();
@@ -361,6 +393,20 @@ findButtonContainer() {
         filtered.forEach(wb => {
             const item = document.createElement('div');
             item.className = 'wb-manage-item';
+
+            // 添加復選框
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'wb-checkbox';
+            checkbox.checked = this.state.selectedWorldbooks.has(wb);
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) {
+                    this.state.selectedWorldbooks.add(wb);
+                } else {
+                    this.state.selectedWorldbooks.delete(wb);
+                }
+                this.updateBulkToolbar();
+            });
 
             const name = document.createElement('div');
             name.className = 'wb-manage-item-name';
@@ -424,10 +470,173 @@ findButtonContainer() {
                 input.focus();
             });
 
+            item.appendChild(checkbox);
             item.appendChild(name);
             item.appendChild(tagsContainer);
             item.appendChild(addBtn);
             container.appendChild(item);
+        });
+    },
+
+    // 更新批量操作工具栏显示状态
+    updateBulkToolbar() {
+        const toolbar = document.getElementById('wb-bulk-toolbar');
+        const count = document.getElementById('wb-bulk-count');
+
+        if (!toolbar || !count) return;
+
+        const selectedCount = this.state.selectedWorldbooks.size;
+
+        if (selectedCount > 0) {
+            toolbar.style.display = 'flex';
+            count.textContent = `已選擇 ${selectedCount} 項`;
+        } else {
+            toolbar.style.display = 'none';
+        }
+    },
+
+    // 全選
+    selectAllWorldbooks() {
+        const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
+        const worldbooks = this.getWorldbookList();
+        const filtered = searchQuery
+            ? worldbooks.filter(wb => wb.toLowerCase().includes(searchQuery))
+            : worldbooks;
+
+        filtered.forEach(wb => this.state.selectedWorldbooks.add(wb));
+        this.renderManageList(searchQuery);
+    },
+
+    // 取消全選
+    deselectAllWorldbooks() {
+        this.state.selectedWorldbooks.clear();
+        const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
+        this.renderManageList(searchQuery);
+    },
+
+    // 批量添加標籤
+    bulkAddTag() {
+        if (this.state.selectedWorldbooks.size === 0) {
+            return;
+        }
+
+        const tag = prompt('請輸入要添加的標籤：');
+        if (!tag || !tag.trim()) return;
+
+        const trimmedTag = tag.trim();
+        this.state.selectedWorldbooks.forEach(wb => {
+            TagStorage.addTag(wb, trimmedTag);
+        });
+
+        const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
+        this.renderManageList(searchQuery);
+    },
+
+    // 批量刪除標籤
+    bulkRemoveTag() {
+        if (this.state.selectedWorldbooks.size === 0) {
+            return;
+        }
+
+        // 獲取所有選中世界書的標籤交集（共有標籤）
+        const selectedWbs = Array.from(this.state.selectedWorldbooks);
+        if (selectedWbs.length === 0) return;
+
+        // 找出所有選中世界書共有的標籤
+        let commonTags = new Set(TagStorage.getTags(selectedWbs[0]));
+        for (let i = 1; i < selectedWbs.length; i++) {
+            const tags = new Set(TagStorage.getTags(selectedWbs[i]));
+            commonTags = new Set([...commonTags].filter(tag => tags.has(tag)));
+        }
+
+        if (commonTags.size === 0) {
+            alert('所選世界書沒有共同的標籤');
+            return;
+        }
+
+        // 顯示標籤選擇對話框
+        this.showBulkRemoveDialog(Array.from(commonTags));
+    },
+
+    // 顯示批量刪除標籤對話框
+    showBulkRemoveDialog(commonTags) {
+        const overlay = document.createElement('div');
+        overlay.className = 'wb-tag-overlay';
+        overlay.style.zIndex = '100001'; // 確保在管理對話框之上
+
+        let tagsHtml = commonTags.map(tag => `
+            <div class="wb-tag-chip" data-tag="${tag}">
+                ${tag}
+            </div>
+        `).join('');
+
+        overlay.innerHTML = `
+            <div class="wb-tag-modal">
+                <div class="wb-tag-header">
+                    <h3>批量刪除標籤</h3>
+                    <button class="wb-tag-close">&times;</button>
+                </div>
+                <div class="wb-tag-body">
+                    <div class="wb-filter-hint">選擇要從所選世界書中刪除的標籤（可多選）</div>
+                    <div class="wb-tag-chips">
+                        ${tagsHtml}
+                    </div>
+                    <div class="wb-tag-actions">
+                        <button class="wb-btn-secondary" id="wb-cancel-bulk-remove">取消</button>
+                        <button class="wb-btn-danger" id="wb-confirm-bulk-remove">刪除</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        // 標籤點擊
+        const selectedTags = new Set();
+        overlay.querySelectorAll('.wb-tag-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                chip.classList.toggle('active');
+                const tag = chip.dataset.tag;
+                if (chip.classList.contains('active')) {
+                    selectedTags.add(tag);
+                } else {
+                    selectedTags.delete(tag);
+                }
+            });
+        });
+
+        // 取消
+        overlay.querySelector('#wb-cancel-bulk-remove').addEventListener('click', () => {
+            overlay.remove();
+        });
+
+        // 確認刪除
+        overlay.querySelector('#wb-confirm-bulk-remove').addEventListener('click', () => {
+            if (selectedTags.size === 0) {
+                alert('請至少選擇一個標籤');
+                return;
+            }
+
+            // 從所有選中的世界書中刪除選中的標籤
+            this.state.selectedWorldbooks.forEach(wb => {
+                selectedTags.forEach(tag => {
+                    TagStorage.removeTag(wb, tag);
+                });
+            });
+
+            overlay.remove();
+            const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
+            this.renderManageList(searchQuery);
+        });
+
+        // 關閉按鈕
+        overlay.querySelector('.wb-tag-close').addEventListener('click', () => {
+            overlay.remove();
+        });
+
+        // 點擊遮罩關閉
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
         });
     }
 };
