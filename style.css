@@ -210,8 +210,8 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: var(--SmartThemeBodyText);  /* 白色背景 */
-    color: var(--SmartThemeBlurTintColor);  /* 深色文字 */
+    background: #ffffff;  
+    color: #1a1a1a;       
     border-radius: 12px;
     font-size: 0.85em;
     font-weight: 600;
