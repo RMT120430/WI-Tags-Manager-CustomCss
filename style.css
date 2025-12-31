@@ -76,13 +76,9 @@
 }
 
 /* 可拖動的標題欄 */
-.wb-tag-modal-large .wb-tag-header.drag-grabber {
-    cursor: grab;
+.wb-tag-modal-large .wb-tag-header {
+    cursor: move;
     user-select: none;
-}
-
-.wb-tag-modal-large .wb-tag-header.drag-grabber:active {
-    cursor: grabbing;
 }
 
 @keyframes fadeIn {
