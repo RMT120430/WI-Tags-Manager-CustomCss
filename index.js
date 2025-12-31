@@ -370,9 +370,9 @@ findButtonContainer() {
         overlay.querySelector('#wb-bulk-add-tag').addEventListener('click', () => this.bulkAddTag());
         overlay.querySelector('#wb-bulk-remove-tag').addEventListener('click', () => this.bulkRemoveTag());
 
-        // 使用 SillyTavern 內建的拖動功能
+        // 使用 SillyTavern 內建的拖動功能（僅桌面端）
         const modal = overlay.querySelector('.draggable');
-        if (modal && window.dragElement) {
+        if (modal && window.dragElement && window.innerWidth > 600) {
             window.dragElement(modal);
         }
 
