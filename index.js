@@ -370,8 +370,46 @@ findButtonContainer() {
         overlay.querySelector('#wb-bulk-add-tag').addEventListener('click', () => this.bulkAddTag());
         overlay.querySelector('#wb-bulk-remove-tag').addEventListener('click', () => this.bulkRemoveTag());
 
+        // 啟用拖動功能
+        this.enableDragging(overlay.querySelector('.wb-tag-modal'));
+
         // 初始渲染
         this.renderManageList();
+    },
+
+    // 啟用窗口拖動功能
+    enableDragging(modal) {
+        const header = modal.querySelector('.wb-tag-header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+
+        header.addEventListener('mousedown', (e) => {
+            // 不要在點擊關閉按鈕時啟動拖動
+            if (e.target.closest('.wb-tag-close')) return;
+
+            isDragging = true;
+            initialX = e.clientX - (modal.offsetLeft || 0);
+            initialY = e.clientY - (modal.offsetTop || 0);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+
+            modal.style.left = currentX + 'px';
+            modal.style.top = currentY + 'px';
+            modal.style.transform = 'none'; // 移除居中的 transform
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
     },
 
     renderManageList(searchQuery = '') {

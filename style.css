@@ -32,17 +32,19 @@
     align-items: center;
     justify-content: center;
     z-index: 100000;
-    padding: 0;
+    padding: 20px;
     box-sizing: border-box;
 }
 
-/* 管理模態窗口使用側邊欄樣式 */
+/* 管理模態窗口使用浮動樣式 */
 #wb-manage-modal.wb-tag-overlay {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(1px);
-    justify-content: flex-end;
-    align-items: stretch;
-    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    pointer-events: none;
+}
+
+#wb-manage-modal .wb-tag-modal {
+    pointer-events: auto;
 }
 
 /* === 主面板 === */
@@ -60,27 +62,33 @@
     overflow: hidden;
 }
 
-/* 側邊欄樣式 */
+/* 浮動窗口樣式 */
 .wb-tag-modal-large {
-    max-width: none;
-    width: 480px;
-    max-height: 100vh;
-    height: 100vh;
-    border-radius: 0;
-    border-right: none;
-    border-top: none;
-    border-bottom: none;
-    animation: slideInRight 0.3s ease-out;
+    max-width: 500px;
+    width: 90vw;
+    max-height: 85vh;
+    height: auto;
+    position: fixed;
+    border-radius: 12px;
+    animation: fadeIn 0.2s ease-out;
+    resize: both;
+    overflow: auto;
 }
 
-@keyframes slideInRight {
+/* 可拖動的標題欄 */
+.wb-tag-modal-large .wb-tag-header {
+    cursor: move;
+    user-select: none;
+}
+
+@keyframes fadeIn {
     from {
-        transform: translateX(100%);
         opacity: 0;
+        transform: scale(0.95);
     }
     to {
-        transform: translateX(0);
         opacity: 1;
+        transform: scale(1);
     }
 }
 
@@ -450,26 +458,28 @@
 /* === 移動端優化 === */
 @media (max-width: 600px) {
     .wb-tag-overlay {
-        padding: 0;
+        padding: 10px;
     }
 
     #wb-manage-modal.wb-tag-overlay {
-        padding: 0;
+        padding: 10px;
     }
 
     .wb-tag-modal {
         max-width: 100%;
         max-height: 90vh;
         border-radius: 12px;
-        margin: 10px;
     }
 
     .wb-tag-modal-large {
         width: 100%;
         max-width: 100%;
-        height: 100vh;
-        margin: 0;
-        border-radius: 0;
+        max-height: 90vh;
+        border-radius: 12px;
+    }
+
+    .wb-tag-modal-large .wb-tag-header {
+        cursor: default;
     }
 
     .wb-tag-header {
