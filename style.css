@@ -64,17 +64,15 @@
 
 /* 浮動窗口樣式 */
 .wb-tag-modal-large {
-    max-width: 600px;
+    max-width: 500px;
     width: 90vw;
     max-height: 85vh;
     height: auto;
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     border-radius: 12px;
     animation: fadeIn 0.2s ease-out;
-    overflow: hidden;
+    resize: both;
+    overflow: auto;
 }
 
 /* 可拖動的標題欄 */
@@ -90,11 +88,11 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translate(-50%, -50%) scale(0.95);
+        transform: scale(0.95);
     }
     to {
         opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
+        transform: scale(1);
     }
 }
 
@@ -478,23 +476,14 @@
     }
 
     .wb-tag-modal-large {
-        width: 95vw;
-        max-width: 95vw;
+        width: 100%;
+        max-width: 100%;
         max-height: 90vh;
         border-radius: 12px;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        position: fixed !important;
     }
 
-    .wb-tag-modal-large .wb-tag-header.drag-grabber {
+    .wb-tag-modal-large .wb-tag-header {
         cursor: default;
-        pointer-events: none;
-    }
-
-    .wb-tag-modal-large .wb-tag-header.drag-grabber * {
-        pointer-events: auto;
     }
 
     .wb-tag-header {
