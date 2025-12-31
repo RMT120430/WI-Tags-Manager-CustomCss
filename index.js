@@ -339,11 +339,41 @@ findButtonContainer() {
             addBtn.className = 'wb-tag-add-mini';
             addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
             addBtn.addEventListener('click', () => {
-                const tag = prompt('輸入新標籤：');
-                if (tag && tag.trim()) {
-                    TagStorage.addTag(wb, tag.trim());
-                    this.renderManageList(searchQuery);
-                }
+                // 檢查是否已經有輸入框
+                if (tagsContainer.querySelector('.wb-tag-inline-input')) return;
+
+                // 創建內嵌輸入框
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'wb-tag-inline-input';
+                input.placeholder = '輸入標籤...';
+
+                // 提交標籤的函數
+                const submitTag = () => {
+                    const tag = input.value.trim();
+                    if (tag) {
+                        TagStorage.addTag(wb, tag);
+                        this.renderManageList(searchQuery);
+                    } else {
+                        input.remove();
+                    }
+                };
+
+                // Enter 鍵提交
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        submitTag();
+                    } else if (e.key === 'Escape') {
+                        input.remove();
+                    }
+                });
+
+                // 失去焦點時提交
+                input.addEventListener('blur', submitTag);
+
+                // 添加輸入框並自動聚焦
+                tagsContainer.appendChild(input);
+                input.focus();
             });
 
             item.appendChild(name);
