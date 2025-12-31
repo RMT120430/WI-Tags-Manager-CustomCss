@@ -110,7 +110,7 @@ const UI = {
     state: {
         activeFilters: new Set(), // 當前啟用的標籤篩選
         originalOptions: [], // 保存原始的選項列表
-        selectedWorldbooks: new Set() // 批量操作：選中的世界書
+        selectedWorldbooks: new Set() // 批次操作：選中的世界書
     },
 
     init() {
@@ -321,7 +321,7 @@ findButtonContainer() {
                 <div class="wb-tag-body">
                     <input type="text" class="wb-tag-search" placeholder="🔍 搜尋世界書..." id="wb-manage-search">
 
-                    <!-- 批量操作工具栏 -->
+                    <!-- 批次操作工具列 -->
                     <div class="wb-bulk-toolbar" id="wb-bulk-toolbar" style="display: none;">
                         <div class="wb-bulk-info">
                             <span id="wb-bulk-count">已選擇 0 項</span>
@@ -333,10 +333,10 @@ findButtonContainer() {
                             <button class="wb-btn-small" id="wb-deselect-all" title="取消全選">
                                 <i class="fa-solid fa-times"></i> 取消
                             </button>
-                            <button class="wb-btn-small wb-btn-primary-small" id="wb-bulk-add-tag" title="批量添加標籤">
-                                <i class="fa-solid fa-plus"></i> 添加標籤
+                            <button class="wb-btn-small wb-btn-primary-small" id="wb-bulk-add-tag" title="批次新增標籤">
+                                <i class="fa-solid fa-plus"></i> 新增標籤
                             </button>
-                            <button class="wb-btn-small wb-btn-danger-small" id="wb-bulk-remove-tag" title="批量刪除標籤">
+                            <button class="wb-btn-small wb-btn-danger-small" id="wb-bulk-remove-tag" title="批次刪除標籤">
                                 <i class="fa-solid fa-trash"></i> 刪除標籤
                             </button>
                         </div>
@@ -364,7 +364,7 @@ findButtonContainer() {
             this.renderManageList(e.target.value.toLowerCase());
         });
 
-        // 批量操作按鈕
+        // 批次操作按鈕
         overlay.querySelector('#wb-select-all').addEventListener('click', () => this.selectAllWorldbooks());
         overlay.querySelector('#wb-deselect-all').addEventListener('click', () => this.deselectAllWorldbooks());
         overlay.querySelector('#wb-bulk-add-tag').addEventListener('click', () => this.bulkAddTag());
@@ -394,7 +394,7 @@ findButtonContainer() {
             const item = document.createElement('div');
             item.className = 'wb-manage-item';
 
-            // 添加復選框
+            // 新增複選框
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'wb-checkbox';
@@ -465,7 +465,7 @@ findButtonContainer() {
                 // 失去焦點時提交
                 input.addEventListener('blur', submitTag);
 
-                // 添加輸入框並自動聚焦
+                // 新增輸入框並自動聚焦
                 tagsContainer.appendChild(input);
                 input.focus();
             });
@@ -478,7 +478,7 @@ findButtonContainer() {
         });
     },
 
-    // 更新批量操作工具栏显示状态
+    // 更新批次操作工具列顯示狀態
     updateBulkToolbar() {
         const toolbar = document.getElementById('wb-bulk-toolbar');
         const count = document.getElementById('wb-bulk-count');
@@ -514,13 +514,13 @@ findButtonContainer() {
         this.renderManageList(searchQuery);
     },
 
-    // 批量添加標籤
+    // 批次新增標籤
     bulkAddTag() {
         if (this.state.selectedWorldbooks.size === 0) {
             return;
         }
 
-        const tag = prompt('請輸入要添加的標籤：');
+        const tag = prompt('請輸入要新增的標籤：');
         if (!tag || !tag.trim()) return;
 
         const trimmedTag = tag.trim();
@@ -532,7 +532,7 @@ findButtonContainer() {
         this.renderManageList(searchQuery);
     },
 
-    // 批量刪除標籤
+    // 批次刪除標籤
     bulkRemoveTag() {
         if (this.state.selectedWorldbooks.size === 0) {
             return;
@@ -558,7 +558,7 @@ findButtonContainer() {
         this.showBulkRemoveDialog(Array.from(commonTags));
     },
 
-    // 顯示批量刪除標籤對話框
+    // 顯示批次刪除標籤對話框
     showBulkRemoveDialog(commonTags) {
         const overlay = document.createElement('div');
         overlay.className = 'wb-tag-overlay';
@@ -573,7 +573,7 @@ findButtonContainer() {
         overlay.innerHTML = `
             <div class="wb-tag-modal">
                 <div class="wb-tag-header">
-                    <h3>批量刪除標籤</h3>
+                    <h3>批次刪除標籤</h3>
                     <button class="wb-tag-close">&times;</button>
                 </div>
                 <div class="wb-tag-body">
