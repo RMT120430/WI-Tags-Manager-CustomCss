@@ -173,7 +173,7 @@
     opacity: 0.5;
 }
 
-/* === 批量操作工具栏 === */
+/* === 批次操作工具列 === */
 .wb-bulk-toolbar {
     display: flex;
     justify-content: space-between;
@@ -278,7 +278,7 @@
     align-items: start;
 }
 
-/* 复选框样式 */
+/* 複選框樣式 */
 .wb-checkbox {
     width: 20px;
     height: 20px;
