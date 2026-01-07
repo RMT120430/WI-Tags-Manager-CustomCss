@@ -10,8 +10,8 @@
 
 /* 啟用狀態（有篩選時） */
 #wb-tag-filter-btn.wb-active {
-    color: var(--SmartThemeBlurTintColor);
-    background: var(--NSDThemeBG4Color) !important;
+    color: var(--NSDThemeBG4Color) ;
+    background: var(--button-filled-brand-background);
 }
 
 /* === 遮罩層 === */
@@ -392,7 +392,6 @@
 .wb-tag-add-mini:hover {
     background: var(--button-filled-brand-background);
     color: var(--SmartThemeBodyText);
-    transform: scale(1.1);
 }
 
 .wb-tag-inline-input {
