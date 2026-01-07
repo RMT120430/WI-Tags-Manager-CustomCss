@@ -155,7 +155,7 @@
 /* === 標籤晶片 === */
 .wb-tag-chip {
     padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--NSDThemeHiglitesColor);
     border-radius: 20px;
     font-size: 0.95em;
     cursor: pointer;
@@ -164,17 +164,19 @@
     min-width: 80px;
     text-align: center;
     color: var(--SmartThemeBodyText);
+    opacity: 0.8;
 }
 
 .wb-tag-chip:hover {
-    background: rgba(0, 0, 0, 0.5);
-    border-color: var(--SmartThemeBodyText);
+    background: var(--NSDThemeHiglitesColor);
+    opacity: 1;
 }
 
 .wb-tag-chip.active {
     background: var(--button-filled-brand-background);
     color: var(--SmartThemeBodyColor);
     font-weight: 600;
+    opacity: 1;
 }
 
 /* === 搜尋框 === */
@@ -373,8 +375,9 @@
 .wb-tag-add-mini {
     width: 32px;
     height: 32px;
+    border: 0;
     border-radius: 50%;
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--NSDThemeHiglitesColor);
     color: var(--SmartThemeBodyText);
     display: flex;
     align-items: center;
@@ -387,9 +390,8 @@
 }
 
 .wb-tag-add-mini:hover {
-    background: rgba(255, 255, 255, 1);
+    background: var(--button-filled-brand-background);
     color: var(--SmartThemeBodyText);
-    border-color: var(--SmartThemeBodyText);
     transform: scale(1.1);
 }
 
