@@ -423,6 +423,8 @@
 .wb-btn-primary,
 .wb-btn-secondary {
     padding: 12px 30px;
+    border: 0;
+    border-radius: 8px;
     font-size: 1em;
     font-weight: 600;
     cursor: pointer;
