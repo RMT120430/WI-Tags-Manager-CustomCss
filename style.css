@@ -33,6 +33,7 @@
 
 /* 管理模態窗口使用浮動樣式 */
 #wb-manage-modal.wb-tag-overlay {
+    background: solid;
     backdrop-filter: none;
     pointer-events: none;
 }
