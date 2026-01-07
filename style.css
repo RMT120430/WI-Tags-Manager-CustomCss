@@ -8,11 +8,6 @@
     transition: all 0.2s;
 }
 
-#wb-tag-filter-btn:hover,
-#wb-tag-manage-btn:hover {
-    color: var(--SmartThemeBlurTintColor);
-}
-
 /* 啟用狀態（有篩選時） */
 #wb-tag-filter-btn.wb-active {
     color: var(--SmartThemeBlurTintColor);
@@ -459,7 +454,6 @@
 
 .wb-btn-primary:hover {
     opacity: 1;
-    border: 1px solid var(--SmartThemeBodyColor);
 }
 
 .wb-btn-secondary {
