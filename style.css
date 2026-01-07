@@ -451,13 +451,15 @@
 }
 
 .wb-btn-primary {
-    background: #ffffff;
-    color: #1a1a1a;
-    border: 2px solid #ffffff;
+    background: var(--button-filled-brand-background);
+    color: var(--SmartThemeBodyColor);
+    border: 0px solid var(--button-filled-brand-background);
+    opacity: 0.8;
 }
 
 .wb-btn-primary:hover {
-    opacity: 0.8;
+    opacity: 1;
+    border: 1px solid var(--SmartThemeBodyColor);
 }
 
 .wb-btn-secondary {
