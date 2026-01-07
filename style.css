@@ -33,7 +33,7 @@
 
 /* 管理模態窗口使用浮動樣式 */
 #wb-manage-modal.wb-tag-overlay {
-    background: var(--NSDThemeBG4Color);
+    background: transparent;
     backdrop-filter: none;
     pointer-events: none;
 }
@@ -44,7 +44,7 @@
 
 /* === 主面板 === */
 .wb-tag-modal {
-    background: solid var(--SmartThemeBlurTintColor);
+    background: solid var(--NSDThemeBG4Color) !important;
     color: var(--SmartThemeBodyText);
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 12px;
