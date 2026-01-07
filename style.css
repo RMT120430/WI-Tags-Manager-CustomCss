@@ -11,7 +11,7 @@
 /* 啟用狀態（有篩選時） */
 #wb-tag-filter-btn.wb-active {
     color: var(--SmartThemeBlurTintColor);
-    background-color: var(--black30a);
+    background: var(--NSDThemeBG4Color) !important;
 }
 
 /* === 遮罩層 === */
@@ -44,9 +44,8 @@
 
 /* === 主面板 === */
 .wb-tag-modal {
-    background: solid var(--NSDThemeBG4Color) !important;
+    background: var(--NSDThemeBG4Color) !important;
     color: var(--SmartThemeBodyText);
-    border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
@@ -93,7 +92,6 @@
     align-items: center;
     padding: 20px;
     border-bottom: 2px solid var(--SmartThemeBorderColor);
-    background: transparent;
     flex-shrink: 0;
 }
 
@@ -141,7 +139,7 @@
     font-size: 0.9em;
     text-align: center;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 6px;
 }
 
@@ -157,8 +155,7 @@
 /* === 標籤晶片 === */
 .wb-tag-chip {
     padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 2px solid var(--SmartThemeBorderColor);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 20px;
     font-size: 0.95em;
     cursor: pointer;
@@ -175,9 +172,8 @@
 }
 
 .wb-tag-chip.active {
-    background: #ffffff;
-    color: #1a1a1a;
-    border-color: #ffffff;
+    background: var(--button-filled-brand-background);
+    color: var(--SmartThemeBodyColor);
     font-weight: 600;
 }
 
@@ -185,8 +181,7 @@
 .wb-tag-search {
     width: 100%;
     padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 2px solid var(--SmartThemeBorderColor);
+    background: rgba(0, 0, 0, 0.5);
     color: var(--SmartThemeBodyText);
     border-radius: 8px;
     font-size: 0.95em;
@@ -210,8 +205,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 15px;
-    background: rgba(0, 0, 0, 0.25);
-    border: 2px solid var(--SmartThemeBorderColor);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     gap: 15px;
     flex-wrap: wrap;
@@ -232,8 +226,7 @@
 
 .wb-bulk-tag-input {
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid var(--SmartThemeBorderColor);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 6px;
     color: var(--SmartThemeBodyText);
     font-size: 0.85em;
@@ -245,7 +238,7 @@
 
 .wb-bulk-tag-input:focus {
     border-color: var(--SmartThemeBodyText);
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .wb-bulk-tag-input::placeholder {
@@ -260,9 +253,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    background: transparent;
     color: var(--SmartThemeBodyText);
-    border: 2px solid var(--SmartThemeBorderColor);
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -270,19 +261,18 @@
 }
 
 .wb-btn-small:hover {
-    border-color: var(--SmartThemeBodyText);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--button-filled-brand-background);
 }
 
 .wb-btn-primary-small {
-    background: #ffffff;
-    color: #1a1a1a;
-    border-color: #ffffff;
+    background: var(--button-filled-brand-background);
+    color: var(--SmartThemeBodyColor);
+    opacity: 0.8;
 }
 
 .wb-btn-primary-small:hover {
-    opacity: 0.85;
-    background: #ffffff;
+    opacity: 1;
+    background: var(--button-filled-brand-background);
 }
 
 .wb-btn-danger-small {
@@ -306,7 +296,6 @@
     min-width: 100px;
     background: #ef4444;
     color: #ffffff;
-    border: 2px solid #ef4444;
 }
 
 .wb-btn-danger:hover {
@@ -323,8 +312,7 @@
 }
 
 .wb-manage-item {
-    background: rgba(0, 0, 0, 0.15);
-    border: 2px solid var(--SmartThemeBorderColor);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 15px;
     display: grid;
@@ -364,8 +352,8 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #ffffff;  
-    color: #1a1a1a;       
+    background: var(--button-filled-brand-background);  
+    color: var(--SmartThemeBodyColor);       
     border-radius: 12px;
     font-size: 0.85em;
     font-weight: 600;
@@ -386,8 +374,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    border: 2px solid var(--SmartThemeBorderColor);
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.8);
     color: var(--SmartThemeBodyText);
     display: flex;
     align-items: center;
@@ -400,7 +387,7 @@
 }
 
 .wb-tag-add-mini:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 1);
     color: var(--SmartThemeBodyText);
     border-color: var(--SmartThemeBodyText);
     transform: scale(1.1);
@@ -408,8 +395,7 @@
 
 .wb-tag-inline-input {
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid var(--SmartThemeBodyText);
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 12px;
     color: var(--SmartThemeBodyText);
     font-size: 0.85em;
@@ -448,7 +434,6 @@
 .wb-btn-primary {
     background: var(--button-filled-brand-background);
     color: var(--SmartThemeBodyColor);
-    border: 0px solid var(--button-filled-brand-background);
     opacity: 0.8;
 }
 
@@ -457,9 +442,7 @@
 }
 
 .wb-btn-secondary {
-    background: transparent;
     color: var(--SmartThemeBodyText);
-    border: 2px solid var(--SmartThemeBorderColor);
 }
 
 .wb-btn-secondary:hover {
