@@ -43,7 +43,7 @@
 
 /* === 主面板 === */
 .wb-tag-modal {
-    background: var(--SmartThemeBlurTintColor);
+    background: solid var(--SmartThemeBlurTintColor);
     color: var(--SmartThemeBodyText);
     border: 2px solid var(--SmartThemeBorderColor);
     border-radius: 12px;
