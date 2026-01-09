@@ -1,32 +1,39 @@
 import { eventSource, event_types } from '../../../../script.js';
 import { world_names } from '../../../world-info.js';
 
+// 用於 localStorage 遷移的舊 key
 const OLD_STORAGE_KEY = 'worldbook_tags_v1';
+// SillyTavern extension settings 的唯一識別符
 const MODULE_NAME = 'worldbook_tags_manager';
 
+// 預設設定
 const defaultSettings = Object.freeze({
-    tags: {}
+    tags: {} // 結構：{ worldbookName: ['tag1', 'tag2'] }
 });
 
+// 獲取 extension settings
 function getSettings() {
     const context = SillyTavern.getContext();
     const { extensionSettings } = context;
 
+    // 初始化設定（如果不存在）
     if (!extensionSettings[MODULE_NAME]) {
         extensionSettings[MODULE_NAME] = structuredClone(defaultSettings);
 
+        // 從舊的 localStorage 遷移資料（如果存在）
         try {
             const oldData = localStorage.getItem(OLD_STORAGE_KEY);
             if (oldData) {
                 const parsed = JSON.parse(oldData);
                 extensionSettings[MODULE_NAME].tags = parsed;
-                console.log('[WB Tags] 已從 localStorage 遷移資料');
+                console.log('[WB Tags] 已從 localStorage 遷移資料 - index.js:29');
             }
         } catch (e) {
-            console.warn('[WB Tags] localStorage 遷移失敗:', e);
+            console.warn('[WB Tags] localStorage 遷移失敗: - index.js:32', e);
         }
     }
 
+    // 確保所有預設 key 都存在
     for (const key of Object.keys(defaultSettings)) {
         if (!Object.hasOwn(extensionSettings[MODULE_NAME], key)) {
             extensionSettings[MODULE_NAME][key] = structuredClone(defaultSettings[key]);
@@ -36,17 +43,19 @@ function getSettings() {
     return extensionSettings[MODULE_NAME];
 }
 
+// 儲存設定
 function saveSettings() {
     const context = SillyTavern.getContext();
     context.saveSettingsDebounced();
 }
 
+// === 資料層 ===
 const TagStorage = {
     load() {
         try {
             return getSettings().tags || {};
         } catch (e) {
-            console.error('[WB Tags] 載入失敗:', e);
+            console.error('[WB Tags] 載入失敗: - index.js:58', e);
             return {};
         }
     },
@@ -56,7 +65,7 @@ const TagStorage = {
             getSettings().tags = data;
             saveSettings();
         } catch (e) {
-            console.error('[WB Tags] 儲存失敗:', e);
+            console.error('[WB Tags] 儲存失敗: - index.js:68', e);
         }
     },
 
@@ -94,22 +103,27 @@ const TagStorage = {
     }
 };
 
+// === UI 層 ===
 const UI = {
     state: {
-        activeFilters: new Set(),
-        originalOptions: [],
-        selectedWorldbooks: new Set()
+        activeFilters: new Set(), // 當前啟用的標籤篩選
+        originalOptions: [], // 保存原始的選項列表
+        selectedWorldbooks: new Set(), // 批次操作：選中的世界書
+        entriesListObserver: null // MutationObserver 實例
     },
 
     init() {
         this.injectButtons();
         this.saveOriginalOptions();
+        // 啟動條目列表保護機制
+        this.startEntriesListProtection();
     },
 
     getWorldbookList() {
         return world_names || [];
     },
 
+    // 儲存原始的下拉選單選項
     saveOriginalOptions() {
         const selector = document.querySelector('#world_editor_select');
         if (selector) {
@@ -120,7 +134,59 @@ const UI = {
         }
     },
 
+    // **核心修復：啟動條目列表保護機制**
+    startEntriesListProtection() {
+        // 清理舊的 observer
+        if (this.state.entriesListObserver) {
+            this.state.entriesListObserver.disconnect();
+        }
+
+        // 創建新的 MutationObserver
+        this.state.entriesListObserver = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                // 檢查是否是 style 屬性變化
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const target = mutation.target;
+                    if (target.id === 'world_popup_entries_list' && target.style.display === 'none') {
+                        console.log('[WB Tags] 偵測到條目列表被隱藏，立即修復 - index.js:151');
+                        // 強制顯示
+                        target.style.display = '';
+                    }
+                }
+            }
+        });
+
+        // 尋找並監控 world_popup_entries_list
+        const observeEntriesList = () => {
+            const entriesList = document.getElementById('world_popup_entries_list');
+            if (entriesList) {
+                // 確保當前是可見的
+                if (entriesList.style.display === 'none') {
+                    entriesList.style.display = '';
+                }
+                
+                // 開始監控
+                this.state.entriesListObserver.observe(entriesList, {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+                
+                console.log('[WB Tags] 條目列表保護已啟動 - index.js:174');
+            }
+        };
+
+        // 立即執行一次
+        observeEntriesList();
+
+        // 監聽世界書編輯器開啟事件（使用 SillyTavern 的事件系統）
+        eventSource.on(event_types.WORLDINFO_UPDATED, () => {
+            setTimeout(observeEntriesList, 100);
+        });
+    },
+
+    // 找到按鈕容器
     findButtonContainer() {
+        // 找到「新增」按鈕,取它的父容器
         const createBtn = document.querySelector('#world_create_button');
         return createBtn ? createBtn.parentElement : null;
     },
@@ -128,14 +194,16 @@ const UI = {
     injectButtons() {
         const container = this.findButtonContainer();
         if (!container) {
-            console.warn('[WB Tags] 找不到按鈕容器');
+            console.warn('[WB Tags] 找不到按鈕容器 - index.js:197');
             return;
         }
 
+        // 檢查是否已經注入
         if (document.getElementById('wb-tag-filter-btn')) {
             return;
         }
 
+        // 建立篩選按鈕
         const filterBtn = document.createElement('div');
         filterBtn.id = 'wb-tag-filter-btn';
         filterBtn.className = 'menu_button';
@@ -143,6 +211,7 @@ const UI = {
         filterBtn.innerHTML = '<i class="fa-solid fa-filter fa-fw"></i>';
         filterBtn.addEventListener('click', () => this.openFilterModal());
 
+        // 建立管理按鈕
         const manageBtn = document.createElement('div');
         manageBtn.id = 'wb-tag-manage-btn';
         manageBtn.className = 'menu_button';
@@ -150,13 +219,16 @@ const UI = {
         manageBtn.innerHTML = '<i class="fa-solid fa-tags fa-fw"></i>';
         manageBtn.addEventListener('click', () => this.openManageModal());
 
+        // 插入按鈕
         container.appendChild(filterBtn);
         container.appendChild(manageBtn);
 
-        console.log('[WB Tags] 按鈕注入成功');
+        console.log('[WB Tags] 按鈕注入成功 - index.js:226');
     },
 
+    // === 篩選功能 ===
     openFilterModal() {
+        // 移除舊的
         const old = document.getElementById('wb-filter-modal');
         if (old) old.remove();
 
@@ -201,23 +273,27 @@ const UI = {
 
         document.body.appendChild(overlay);
 
+        // 綁定事件
         overlay.querySelector('.wb-tag-close').addEventListener('click', () => overlay.remove());
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) overlay.remove();
         });
 
+        // 標籤點擊
         overlay.querySelectorAll('.wb-tag-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 chip.classList.toggle('active');
             });
         });
 
+        // 清除篩選
         overlay.querySelector('#wb-clear-filter').addEventListener('click', () => {
             this.state.activeFilters.clear();
             this.applyFilter();
             overlay.remove();
         });
 
+        // 套用篩選
         overlay.querySelector('#wb-apply-filter').addEventListener('click', () => {
             const selectedTags = Array.from(overlay.querySelectorAll('.wb-tag-chip.active'))
                 .map(chip => chip.dataset.tag);
@@ -232,9 +308,7 @@ const UI = {
         const selector = document.querySelector('#world_editor_select');
         if (!selector) return;
 
-        // 保存當前選中的世界書
-        const currentValue = selector.value;
-
+        // 如果沒有篩選，恢復全部
         if (this.state.activeFilters.size === 0) {
             // 恢復原始選項
             selector.innerHTML = '';
@@ -245,38 +319,23 @@ const UI = {
                 selector.appendChild(option);
             });
 
-            // **關鍵修復：恢復之前的選中值，或選第一個**
-            if (currentValue && Array.from(selector.options).some(opt => opt.value === currentValue)) {
-                selector.value = currentValue;
-            } else if (selector.options.length > 0) {
-                selector.selectedIndex = 0;
-            }
-
+            // 更新篩選按鈕狀態
             const filterBtn = document.getElementById('wb-tag-filter-btn');
             if (filterBtn) {
                 filterBtn.classList.remove('wb-active');
             }
             
-            // 觸發 change 事件載入世界書內容
-            $(selector).trigger('change');
+            // **關鍵修復：確保條目列表可見後再觸發 change**
+            this.ensureEntriesListVisibleBeforeChange(selector);
             return;
         }
 
         // 篩選世界書
         const filtered = this.getWorldbookList().filter(wb => {
             const tags = TagStorage.getTags(wb);
+            // 只要有任一篩選標籤就顯示
             return Array.from(this.state.activeFilters).some(tag => tags.includes(tag));
         });
-
-        if (filtered.length === 0) {
-            // 如果沒有符合的世界書，清空選單並提示
-            selector.innerHTML = '<option value="">-- 無符合的世界書 --</option>';
-            const filterBtn = document.getElementById('wb-tag-filter-btn');
-            if (filterBtn) {
-                filterBtn.classList.add('wb-active');
-            }
-            return;
-        }
 
         // 更新下拉選單
         selector.innerHTML = '';
@@ -287,26 +346,50 @@ const UI = {
             selector.appendChild(option);
         });
 
-        // **關鍵修復：設置選中第一個選項（或之前的選項如果還在列表中）**
-        if (currentValue && filtered.includes(currentValue)) {
-            selector.value = currentValue;
-        } else {
-            selector.selectedIndex = 0;
-        }
-
+        // 更新篩選按鈕狀態（顯示為啟用）
         const filterBtn = document.getElementById('wb-tag-filter-btn');
         if (filterBtn) {
             filterBtn.classList.add('wb-active');
         }
 
-        // **關鍵修復：觸發 change 事件載入世界書內容**
-        $(selector).trigger('change');
+        // **關鍵修復：確保條目列表可見後再觸發 change**
+        this.ensureEntriesListVisibleBeforeChange(selector);
     },
 
+    // **新增方法：在觸發 change 前確保條目列表可見**
+    ensureEntriesListVisibleBeforeChange(selector) {
+        const entriesList = document.getElementById('world_popup_entries_list');
+        
+        // 多重保護機制
+        const forceShow = () => {
+            if (entriesList) {
+                entriesList.style.display = '';
+                entriesList.style.visibility = 'visible';
+                entriesList.style.opacity = '1';
+            }
+        };
+
+        // 1. 立即執行一次
+        forceShow();
+
+        // 2. 觸發 change 事件（使用 jQuery）
+        $(selector).trigger('change');
+
+        // 3. 延遲再次確認（change 事件可能會異步修改 DOM）
+        setTimeout(forceShow, 50);
+        setTimeout(forceShow, 150);
+        setTimeout(forceShow, 300);
+
+        console.log('[WB Tags] 已套用篩選並保護條目列表顯示 - index.js:383');
+    },
+
+    // === 管理功能 ===
     openManageModal() {
+        // 移除舊的
         const old = document.getElementById('wb-manage-modal');
         if (old) old.remove();
 
+        // 重置選中狀態
         this.state.selectedWorldbooks.clear();
 
         const overlay = document.createElement('div');
@@ -322,6 +405,7 @@ const UI = {
                 <div class="wb-tag-body">
                     <input type="text" class="wb-tag-search" placeholder="🔍 搜尋世界書..." id="wb-manage-search">
 
+                    <!-- 批次操作工具列 -->
                     <div class="wb-bulk-toolbar" id="wb-bulk-toolbar" style="display: none;">
                         <div class="wb-bulk-info">
                             <span id="wb-bulk-count">已選擇 0 項</span>
@@ -353,31 +437,39 @@ const UI = {
 
         document.body.appendChild(overlay);
 
+        // 綁定事件
         overlay.querySelector('.wb-tag-close').addEventListener('click', () => overlay.remove());
         overlay.querySelector('#wb-manage-done').addEventListener('click', () => overlay.remove());
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) overlay.remove();
         });
 
+        // 搜尋功能
         overlay.querySelector('#wb-manage-search').addEventListener('input', (e) => {
             this.renderManageList(e.target.value.toLowerCase());
         });
 
+        // 批次操作按鈕
         overlay.querySelector('#wb-select-all').addEventListener('click', () => this.selectAllWorldbooks());
         overlay.querySelector('#wb-deselect-all').addEventListener('click', () => this.deselectAllWorldbooks());
         overlay.querySelector('#wb-bulk-add-tag').addEventListener('click', () => this.bulkAddTag());
         overlay.querySelector('#wb-bulk-remove-tag').addEventListener('click', () => this.bulkRemoveTag());
 
+        // 批次輸入框 Enter 鍵支援
         overlay.querySelector('#wb-bulk-tag-input').addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.bulkAddTag();
             }
         });
 
+        // 啟用拖動功能
         this.enableDragging(overlay.querySelector('.wb-tag-modal'));
+
+        // 初始渲染
         this.renderManageList();
     },
 
+    // 啟用窗口拖動功能
     enableDragging(modal) {
         const header = modal.querySelector('.wb-tag-header');
         let isDragging = false;
@@ -387,6 +479,7 @@ const UI = {
         let initialY;
 
         header.addEventListener('mousedown', (e) => {
+            // 不要在點擊關閉按鈕時啟動拖動
             if (e.target.closest('.wb-tag-close')) return;
 
             isDragging = true;
@@ -403,7 +496,7 @@ const UI = {
 
             modal.style.left = currentX + 'px';
             modal.style.top = currentY + 'px';
-            modal.style.transform = 'none';
+            modal.style.transform = 'none'; // 移除居中的 transform
         });
 
         document.addEventListener('mouseup', () => {
@@ -431,6 +524,7 @@ const UI = {
             const item = document.createElement('div');
             item.className = 'wb-manage-item';
 
+            // 新增複選框
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'wb-checkbox';
@@ -451,6 +545,7 @@ const UI = {
             const tagsContainer = document.createElement('div');
             tagsContainer.className = 'wb-manage-item-tags';
 
+            // 顯示現有標籤
             const tags = TagStorage.getTags(wb);
             tags.forEach(tag => {
                 const chip = document.createElement('span');
@@ -463,17 +558,21 @@ const UI = {
                 tagsContainer.appendChild(chip);
             });
 
+            // 新增標籤按鈕
             const addBtn = document.createElement('button');
             addBtn.className = 'wb-tag-add-mini';
             addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
             addBtn.addEventListener('click', () => {
+                // 檢查是否已經有輸入框
                 if (tagsContainer.querySelector('.wb-tag-inline-input')) return;
 
+                // 創建內嵌輸入框
                 const input = document.createElement('input');
                 input.type = 'text';
                 input.className = 'wb-tag-inline-input';
                 input.placeholder = '輸入標籤...';
 
+                // 提交標籤的函數
                 const submitTag = () => {
                     const tag = input.value.trim();
                     if (tag) {
@@ -484,6 +583,7 @@ const UI = {
                     }
                 };
 
+                // Enter 鍵提交
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         submitTag();
@@ -492,8 +592,10 @@ const UI = {
                     }
                 });
 
+                // 失去焦點時提交
                 input.addEventListener('blur', submitTag);
 
+                // 新增輸入框並自動聚焦
                 tagsContainer.appendChild(input);
                 input.focus();
             });
@@ -506,6 +608,7 @@ const UI = {
         });
     },
 
+    // 更新批次操作工具列顯示狀態
     updateBulkToolbar() {
         const toolbar = document.getElementById('wb-bulk-toolbar');
         const count = document.getElementById('wb-bulk-count');
@@ -522,6 +625,7 @@ const UI = {
         }
     },
 
+    // 全選
     selectAllWorldbooks() {
         const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
         const worldbooks = this.getWorldbookList();
@@ -533,12 +637,14 @@ const UI = {
         this.renderManageList(searchQuery);
     },
 
+    // 取消全選
     deselectAllWorldbooks() {
         this.state.selectedWorldbooks.clear();
         const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
         this.renderManageList(searchQuery);
     },
 
+    // 批次新增標籤
     bulkAddTag() {
         if (this.state.selectedWorldbooks.size === 0) {
             return;
@@ -554,20 +660,24 @@ const UI = {
             TagStorage.addTag(wb, tag);
         });
 
+        // 清空輸入框
         input.value = '';
 
         const searchQuery = document.getElementById('wb-manage-search')?.value.toLowerCase() || '';
         this.renderManageList(searchQuery);
     },
 
+    // 批次刪除標籤
     bulkRemoveTag() {
         if (this.state.selectedWorldbooks.size === 0) {
             return;
         }
 
+        // 獲取所有選中世界書的標籤交集（共有標籤）
         const selectedWbs = Array.from(this.state.selectedWorldbooks);
         if (selectedWbs.length === 0) return;
 
+        // 找出所有選中世界書共有的標籤
         let commonTags = new Set(TagStorage.getTags(selectedWbs[0]));
         for (let i = 1; i < selectedWbs.length; i++) {
             const tags = new Set(TagStorage.getTags(selectedWbs[i]));
@@ -579,13 +689,15 @@ const UI = {
             return;
         }
 
+        // 顯示標籤選擇對話框
         this.showBulkRemoveDialog(Array.from(commonTags));
     },
 
+    // 顯示批次刪除標籤對話框
     showBulkRemoveDialog(commonTags) {
         const overlay = document.createElement('div');
         overlay.className = 'wb-tag-overlay';
-        overlay.style.zIndex = '100001';
+        overlay.style.zIndex = '100001'; // 確保在管理對話框之上
 
         let tagsHtml = commonTags.map(tag => `
             <div class="wb-tag-chip" data-tag="${tag}">
@@ -614,6 +726,7 @@ const UI = {
 
         document.body.appendChild(overlay);
 
+        // 標籤點擊
         const selectedTags = new Set();
         overlay.querySelectorAll('.wb-tag-chip').forEach(chip => {
             chip.addEventListener('click', () => {
@@ -627,16 +740,19 @@ const UI = {
             });
         });
 
+        // 取消
         overlay.querySelector('#wb-cancel-bulk-remove').addEventListener('click', () => {
             overlay.remove();
         });
 
+        // 確認刪除
         overlay.querySelector('#wb-confirm-bulk-remove').addEventListener('click', () => {
             if (selectedTags.size === 0) {
                 alert('請至少選擇一個標籤');
                 return;
             }
 
+            // 從所有選中的世界書中刪除選中的標籤
             this.state.selectedWorldbooks.forEach(wb => {
                 selectedTags.forEach(tag => {
                     TagStorage.removeTag(wb, tag);
@@ -648,18 +764,21 @@ const UI = {
             this.renderManageList(searchQuery);
         });
 
+        // 關閉按鈕
         overlay.querySelector('.wb-tag-close').addEventListener('click', () => {
             overlay.remove();
         });
 
+        // 點擊遮罩關閉
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) overlay.remove();
         });
     }
 };
 
+// === 初始化 ===
 const init = () => {
-    console.log('[WB Tags] 開始初始化');
+    console.log('[WB Tags] 開始初始化 - index.js:781');
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
