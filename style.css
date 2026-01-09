@@ -45,7 +45,7 @@
 /* === 主面板 === */
 .wb-tag-modal {
     background: var(--NSDThemeBG4Color) !important;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     border-radius: 12px;
     width: 100%;
     max-width: 500px;
@@ -98,7 +98,7 @@
 .wb-tag-header h3 {
     margin: 0;
     font-size: 1.2em;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     font-weight: 700;
 }
 
@@ -107,7 +107,7 @@
     border: none;
     font-size: 1.5em;
     cursor: pointer;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.6;
     transition: opacity 0.2s;
     padding: 0;
@@ -120,7 +120,7 @@
 
 .wb-tag-close:hover {
     opacity: 1;
-    color: #ef4444;
+    color: #800;
 }
 
 .wb-tag-body {
@@ -134,7 +134,7 @@
 
 /* === 篩選提示 === */
 .wb-filter-hint {
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.7;
     font-size: 0.9em;
     text-align: center;
@@ -155,7 +155,7 @@
 /* === 標籤晶片 === */
 .wb-tag-chip {
     padding: 10px 20px;
-    background: var(--NSDThemeHiglitesColor);
+    background: var(--SmartThemeUnderlineColor);
     border-radius: 20px;
     font-size: 0.95em;
     cursor: pointer;
@@ -163,12 +163,12 @@
     user-select: none;
     min-width: 80px;
     text-align: center;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.8;
 }
 
 .wb-tag-chip:hover {
-    background: var(--NSDThemeHiglitesColor);
+    background: var(--SmartThemeUnderlineColor);
     opacity: 1;
 }
 
@@ -184,7 +184,7 @@
     width: 100%;
     padding: 12px 15px;
     background: rgba(0, 0, 0, 0.5);
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     border-radius: 8px;
     font-size: 0.95em;
     outline: none;
@@ -193,11 +193,11 @@
 }
 
 .wb-tag-search:focus {
-    border-color: var(--SmartThemeBodyText);
+    border-color: var(--SmartThemeBodyColor);
 }
 
 .wb-tag-search::placeholder {
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.5;
 }
 
@@ -214,7 +214,7 @@
 }
 
 .wb-bulk-info {
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     font-weight: 600;
     font-size: 0.95em;
 }
@@ -230,7 +230,7 @@
     padding: 6px 12px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 6px;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     font-size: 0.85em;
     font-weight: 600;
     outline: none;
@@ -239,12 +239,12 @@
 }
 
 .wb-bulk-tag-input:focus {
-    border-color: var(--SmartThemeBodyText);
+    border-color: var(--SmartThemeBodyColor);
     background: rgba(255, 255, 255, 0.5);
 }
 
 .wb-bulk-tag-input::placeholder {
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.5;
 }
 
@@ -255,7 +255,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -284,8 +284,8 @@
 }
 
 .wb-btn-danger-small:hover {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: #800;
+    border-color: #800;
 }
 
 .wb-btn-danger {
@@ -301,8 +301,8 @@
 }
 
 .wb-btn-danger:hover {
-    background: #dc2626;
-    border-color: #dc2626;
+    background: #800;
+    border-color: #800;
 }
 
 /* === 管理列表 === */
@@ -334,7 +334,7 @@
 
 .wb-manage-item-name {
     font-weight: 600;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     font-size: 1em;
     grid-column: 2;
     word-break: break-word;
@@ -377,8 +377,8 @@
     height: 32px;
     border: 0;
     border-radius: 50%;
-    background: var(--NSDThemeHiglitesColor);
-    color: var(--SmartThemeBodyText);
+    background: var(--SmartThemeUnderlineColor);
+    color: var(--SmartThemeBodyColor);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -391,14 +391,14 @@
 
 .wb-tag-add-mini:hover {
     background: var(--button-filled-brand-background);
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
 }
 
 .wb-tag-inline-input {
     padding: 6px 12px;
     background: rgba(255, 255, 255, 0.5);
     border-radius: 12px;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     font-size: 0.85em;
     font-weight: 600;
     outline: none;
@@ -406,7 +406,7 @@
 }
 
 .wb-tag-inline-input::placeholder {
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.5;
 }
 
@@ -444,7 +444,7 @@
 }
 
 .wb-btn-secondary {
-    background: var(--NSDThemeHiglitesColor);
+    background: var(--SmartThemeUnderlineColor);
     color: var(--SmartThemeBodyColor);
     opacity: 0.8;
 }
@@ -457,7 +457,7 @@
 .wb-tag-empty {
     text-align: center;
     padding: 40px;
-    color: var(--SmartThemeBodyText);
+    color: var(--SmartThemeBodyColor);
     opacity: 0.5;
     font-style: italic;
 }
@@ -560,5 +560,5 @@
 
 .wb-tag-body::-webkit-scrollbar-thumb:hover,
 .wb-manage-list::-webkit-scrollbar-thumb:hover {
-    background: var(--SmartThemeBodyText);
+    background: var(--SmartThemeBodyColor);
 }
