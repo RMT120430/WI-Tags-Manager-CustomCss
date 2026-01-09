@@ -10,7 +10,7 @@
 
 /* 啟用狀態（有篩選時） */
 #wb-tag-filter-btn.wb-active {
-    color: var(--NSDThemeBG4Color) ;
+    color: var(--SmartThemeBlurTintColor) ;
     background: var(--SmartThemeUnderlineColor);
 }
 
@@ -44,7 +44,7 @@
 
 /* === 主面板 === */
 .wb-tag-modal {
-    background: var(--NSDThemeBG4Color) !important;
+    background: var(--SmartThemeBlurTintColor) !important;
     color: var(--SmartThemeBodyColor);
     border-radius: 12px;
     width: 100%;
