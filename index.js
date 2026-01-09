@@ -26,10 +26,10 @@ function getSettings() {
             if (oldData) {
                 const parsed = JSON.parse(oldData);
                 extensionSettings[MODULE_NAME].tags = parsed;
-                console.log('[WB Tags] 已從 localStorage 遷移資料 - index.js:29');
+                console.log('[WB Tags] 已從 localStorage 遷移資料');
             }
         } catch (e) {
-            console.warn('[WB Tags] localStorage 遷移失敗: - index.js:32', e);
+            console.warn('[WB Tags] localStorage 遷移失敗:', e);
         }
     }
 
@@ -55,7 +55,7 @@ const TagStorage = {
         try {
             return getSettings().tags || {};
         } catch (e) {
-            console.error('[WB Tags] 載入失敗: - index.js:58', e);
+            console.error('[WB Tags] 載入失敗:', e);
             return {};
         }
     },
@@ -65,7 +65,7 @@ const TagStorage = {
             getSettings().tags = data;
             saveSettings();
         } catch (e) {
-            console.error('[WB Tags] 儲存失敗: - index.js:68', e);
+            console.error('[WB Tags] 儲存失敗:', e);
         }
     },
 
@@ -109,14 +109,12 @@ const UI = {
         activeFilters: new Set(), // 當前啟用的標籤篩選
         originalOptions: [], // 保存原始的選項列表
         selectedWorldbooks: new Set(), // 批次操作：選中的世界書
-        entriesListObserver: null // MutationObserver 實例
     },
 
     init() {
         this.injectButtons();
         this.saveOriginalOptions();
-        // 啟動條目列表保護機制
-        this.startEntriesListProtection();
+        // 移除：startEntriesListProtection - 這是造成顯示異常的主因
     },
 
     getWorldbookList() {
@@ -134,56 +132,6 @@ const UI = {
         }
     },
 
-    // **核心修復：啟動條目列表保護機制**
-    startEntriesListProtection() {
-        // 清理舊的 observer
-        if (this.state.entriesListObserver) {
-            this.state.entriesListObserver.disconnect();
-        }
-
-        // 創建新的 MutationObserver
-        this.state.entriesListObserver = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                // 檢查是否是 style 屬性變化
-                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                    const target = mutation.target;
-                    if (target.id === 'world_popup_entries_list' && target.style.display === 'none') {
-                        console.log('[WB Tags] 偵測到條目列表被隱藏，立即修復 - index.js:151');
-                        // 強制顯示
-                        target.style.display = '';
-                    }
-                }
-            }
-        });
-
-        // 尋找並監控 world_popup_entries_list
-        const observeEntriesList = () => {
-            const entriesList = document.getElementById('world_popup_entries_list');
-            if (entriesList) {
-                // 確保當前是可見的
-                if (entriesList.style.display === 'none') {
-                    entriesList.style.display = '';
-                }
-                
-                // 開始監控
-                this.state.entriesListObserver.observe(entriesList, {
-                    attributes: true,
-                    attributeFilter: ['style']
-                });
-                
-                console.log('[WB Tags] 條目列表保護已啟動 - index.js:174');
-            }
-        };
-
-        // 立即執行一次
-        observeEntriesList();
-
-        // 監聽世界書編輯器開啟事件（使用 SillyTavern 的事件系統）
-        eventSource.on(event_types.WORLDINFO_UPDATED, () => {
-            setTimeout(observeEntriesList, 100);
-        });
-    },
-
     // 找到按鈕容器
     findButtonContainer() {
         // 找到「新增」按鈕,取它的父容器
@@ -194,7 +142,7 @@ const UI = {
     injectButtons() {
         const container = this.findButtonContainer();
         if (!container) {
-            console.warn('[WB Tags] 找不到按鈕容器 - index.js:197');
+            // console.warn('[WB Tags] 找不到按鈕容器'); // 初始化時可能還沒載入，不報錯
             return;
         }
 
@@ -223,7 +171,7 @@ const UI = {
         container.appendChild(filterBtn);
         container.appendChild(manageBtn);
 
-        console.log('[WB Tags] 按鈕注入成功 - index.js:226');
+        console.log('[WB Tags] 按鈕注入成功');
     },
 
     // === 篩選功能 ===
@@ -308,6 +256,10 @@ const UI = {
         const selector = document.querySelector('#world_editor_select');
         if (!selector) return;
 
+        // 保存當前選中的值
+        const currentSelection = selector.value;
+        let newSelection = currentSelection;
+
         // 如果沒有篩選，恢復全部
         if (this.state.activeFilters.size === 0) {
             // 恢復原始選項
@@ -324,63 +276,50 @@ const UI = {
             if (filterBtn) {
                 filterBtn.classList.remove('wb-active');
             }
+        } else {
+            // 篩選世界書
+            const filtered = this.getWorldbookList().filter(wb => {
+                const tags = TagStorage.getTags(wb);
+                // 只要有任一篩選標籤就顯示
+                return Array.from(this.state.activeFilters).some(tag => tags.includes(tag));
+            });
+
+            // 更新下拉選單
+            selector.innerHTML = '';
+            filtered.forEach(wb => {
+                const option = document.createElement('option');
+                option.value = wb;
+                option.textContent = wb;
+                selector.appendChild(option);
+            });
+
+            // 檢查當前選中的書是否還在過濾後的列表中
+            const isCurrentStillAvailable = filtered.includes(currentSelection);
             
-            // **關鍵修復：確保條目列表可見後再觸發 change**
-            this.ensureEntriesListVisibleBeforeChange(selector);
-            return;
-        }
-
-        // 篩選世界書
-        const filtered = this.getWorldbookList().filter(wb => {
-            const tags = TagStorage.getTags(wb);
-            // 只要有任一篩選標籤就顯示
-            return Array.from(this.state.activeFilters).some(tag => tags.includes(tag));
-        });
-
-        // 更新下拉選單
-        selector.innerHTML = '';
-        filtered.forEach(wb => {
-            const option = document.createElement('option');
-            option.value = wb;
-            option.textContent = wb;
-            selector.appendChild(option);
-        });
-
-        // 更新篩選按鈕狀態（顯示為啟用）
-        const filterBtn = document.getElementById('wb-tag-filter-btn');
-        if (filterBtn) {
-            filterBtn.classList.add('wb-active');
-        }
-
-        // **關鍵修復：確保條目列表可見後再觸發 change**
-        this.ensureEntriesListVisibleBeforeChange(selector);
-    },
-
-    // **新增方法：在觸發 change 前確保條目列表可見**
-    ensureEntriesListVisibleBeforeChange(selector) {
-        const entriesList = document.getElementById('world_popup_entries_list');
-        
-        // 多重保護機制
-        const forceShow = () => {
-            if (entriesList) {
-                entriesList.style.display = '';
-                entriesList.style.visibility = 'visible';
-                entriesList.style.opacity = '1';
+            // 如果原本選中的書不在了，預設選取第一個；如果在，保持選中
+            if (!isCurrentStillAvailable && filtered.length > 0) {
+                newSelection = filtered[0];
+            } else if (filtered.length === 0) {
+                newSelection = ""; // 沒有符合的項目
             }
-        };
 
-        // 1. 立即執行一次
-        forceShow();
+            // 更新篩選按鈕狀態（顯示為啟用）
+            const filterBtn = document.getElementById('wb-tag-filter-btn');
+            if (filterBtn) {
+                filterBtn.classList.add('wb-active');
+            }
+        }
 
-        // 2. 觸發 change 事件（使用 jQuery）
+        // 設定選取值
+        if (newSelection) {
+            selector.value = newSelection;
+        }
+
+        // 使用 jQuery 觸發 change 事件通知 SillyTavern 更新列表
+        // 這是 SillyTavern 刷新列表的關鍵
         $(selector).trigger('change');
-
-        // 3. 延遲再次確認（change 事件可能會異步修改 DOM）
-        setTimeout(forceShow, 50);
-        setTimeout(forceShow, 150);
-        setTimeout(forceShow, 300);
-
-        console.log('[WB Tags] 已套用篩選並保護條目列表顯示 - index.js:383');
+        
+        console.log('[WB Tags] 篩選已套用，當前選取:', selector.value);
     },
 
     // === 管理功能 ===
@@ -778,7 +717,7 @@ const UI = {
 
 // === 初始化 ===
 const init = () => {
-    console.log('[WB Tags] 開始初始化 - index.js:781');
+    console.log('[WB Tags] 開始初始化');
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
@@ -790,7 +729,12 @@ const init = () => {
 };
 
 eventSource.on(event_types.WORLDINFO_UPDATED, () => {
+    // 列表更新時，重新獲取原始選項，但不要亂動 DOM
     UI.saveOriginalOptions();
+    // 檢查按鈕是否還在（有些操作可能會重繪介面）
+    if (!document.getElementById('wb-tag-filter-btn')) {
+        UI.injectButtons();
+    }
 });
 
 init();
