@@ -304,9 +304,8 @@ const UI = {
                 filterBtn.classList.remove('wb-active');
             }
             
-            // **修復：觸發 change 事件後確保條目列表可見**
-            selector.dispatchEvent(new Event('change'));
-            setTimeout(() => this.ensureEntriesListVisible(), 100);
+            // **關鍵修復：使用 jQuery 觸發 change 並重新載入世界書**
+            $(selector).trigger('change');
             return;
         }
 
@@ -332,9 +331,9 @@ const UI = {
             filterBtn.classList.add('wb-active');
         }
 
-        // **修復：觸發 change 事件後確保條目列表可見**
-        selector.dispatchEvent(new Event('change'));
-        setTimeout(() => this.ensureEntriesListVisible(), 100);
+        // **關鍵修復：使用 jQuery 觸發 change 並重新載入世界書**
+        // SillyTavern 使用 jQuery 事件監聽，必須用 jQuery 的 trigger
+        $(selector).trigger('change');
     },
 
     // === 管理功能 ===
@@ -732,7 +731,7 @@ const UI = {
 
 // === 初始化 ===
 const init = () => {
-    console.log('[WB Tags] 開始初始化 - index.js:735');
+    console.log('[WB Tags] 開始初始化 - index.js:734');
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
