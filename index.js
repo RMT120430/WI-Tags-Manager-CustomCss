@@ -26,12 +26,10 @@ function getSettings() {
             if (oldData) {
                 const parsed = JSON.parse(oldData);
                 extensionSettings[MODULE_NAME].tags = parsed;
-                console.log('[WB Tags] 已從 localStorage 遷移資料');
-                // 遷移後可選擇性刪除舊資料
-                // localStorage.removeItem(OLD_STORAGE_KEY);
+                console.log('[WB Tags] 已從 localStorage 遷移資料 - index.js:29');
             }
         } catch (e) {
-            console.warn('[WB Tags] localStorage 遷移失敗:', e);
+            console.warn('[WB Tags] localStorage 遷移失敗: - index.js:32', e);
         }
     }
 
@@ -57,7 +55,7 @@ const TagStorage = {
         try {
             return getSettings().tags || {};
         } catch (e) {
-            console.error('[WB Tags] 載入失敗:', e);
+            console.error('[WB Tags] 載入失敗: - index.js:58', e);
             return {};
         }
     },
@@ -67,7 +65,7 @@ const TagStorage = {
             getSettings().tags = data;
             saveSettings();
         } catch (e) {
-            console.error('[WB Tags] 儲存失敗:', e);
+            console.error('[WB Tags] 儲存失敗: - index.js:68', e);
         }
     },
 
@@ -116,6 +114,8 @@ const UI = {
     init() {
         this.injectButtons();
         this.saveOriginalOptions();
+        // 監聽世界書編輯器的打開事件，確保條目列表正常顯示
+        this.ensureEntriesListVisible();
     },
 
     getWorldbookList() {
@@ -133,17 +133,47 @@ const UI = {
         }
     },
 
+    // **修復：確保條目列表可見**
+    ensureEntriesListVisible() {
+        // 使用 MutationObserver 監聽 DOM 變化
+        const observer = new MutationObserver(() => {
+            const entriesList = document.getElementById('world_popup_entries_list');
+            if (entriesList && entriesList.style.display === 'none') {
+                // 如果被設為 none，恢復為預設顯示
+                entriesList.style.display = '';
+                console.log('[WB Tags] 已修復條目列表顯示 - index.js:144');
+            }
+        });
+
+        // 監聽世界書編輯器容器
+        const worldPopup = document.getElementById('world_popup');
+        if (worldPopup) {
+            observer.observe(worldPopup, {
+                attributes: true,
+                attributeFilter: ['style'],
+                subtree: true,
+                childList: true
+            });
+        }
+
+        // 立即檢查一次
+        const entriesList = document.getElementById('world_popup_entries_list');
+        if (entriesList && entriesList.style.display === 'none') {
+            entriesList.style.display = '';
+        }
+    },
+
     // 找到按鈕容器
-findButtonContainer() {
-    // 找到「新增」按鈕,取它的父容器
-    const createBtn = document.querySelector('#world_create_button');
-    return createBtn ? createBtn.parentElement : null;
-},
+    findButtonContainer() {
+        // 找到「新增」按鈕,取它的父容器
+        const createBtn = document.querySelector('#world_create_button');
+        return createBtn ? createBtn.parentElement : null;
+    },
 
     injectButtons() {
         const container = this.findButtonContainer();
         if (!container) {
-            console.warn('[WB Tags] 找不到按鈕容器');
+            console.warn('[WB Tags] 找不到按鈕容器 - index.js:176');
             return;
         }
 
@@ -172,7 +202,7 @@ findButtonContainer() {
         container.appendChild(filterBtn);
         container.appendChild(manageBtn);
 
-        console.log('[WB Tags] 按鈕注入成功');
+        console.log('[WB Tags] 按鈕注入成功 - index.js:205');
     },
 
     // === 篩選功能 ===
@@ -273,6 +303,10 @@ findButtonContainer() {
             if (filterBtn) {
                 filterBtn.classList.remove('wb-active');
             }
+            
+            // **修復：觸發 change 事件後確保條目列表可見**
+            selector.dispatchEvent(new Event('change'));
+            setTimeout(() => this.ensureEntriesListVisible(), 100);
             return;
         }
 
@@ -297,6 +331,10 @@ findButtonContainer() {
         if (filterBtn) {
             filterBtn.classList.add('wb-active');
         }
+
+        // **修復：觸發 change 事件後確保條目列表可見**
+        selector.dispatchEvent(new Event('change'));
+        setTimeout(() => this.ensureEntriesListVisible(), 100);
     },
 
     // === 管理功能 ===
@@ -694,7 +732,7 @@ findButtonContainer() {
 
 // === 初始化 ===
 const init = () => {
-    console.log('[WB Tags] 開始初始化');
+    console.log('[WB Tags] 開始初始化 - index.js:735');
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
