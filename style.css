@@ -11,7 +11,7 @@
 /* 啟用狀態（有篩選時） */
 #wb-tag-filter-btn.wb-active {
     color: var(--NSDThemeBG4Color) ;
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
 }
 
 /* === 遮罩層 === */
@@ -155,7 +155,7 @@
 /* === 標籤晶片 === */
 .wb-tag-chip {
     padding: 10px 20px;
-    background: var(--SmartThemeUnderlineColor);
+    background: var(--SmartThemeBlurTintColor);
     border-radius: 20px;
     font-size: 0.95em;
     cursor: pointer;
@@ -173,7 +173,7 @@
 }
 
 .wb-tag-chip.active {
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
     color: var(--SmartThemeBodyColor);
     font-weight: 600;
     opacity: 1;
@@ -263,18 +263,18 @@
 }
 
 .wb-btn-small:hover {
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
 }
 
 .wb-btn-primary-small {
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
     color: var(--SmartThemeBodyColor);
     opacity: 0.8;
 }
 
 .wb-btn-primary-small:hover {
     opacity: 1;
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
 }
 
 .wb-btn-danger-small {
@@ -354,7 +354,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: var(--button-filled-brand-background);  
+    background: var(--SmartThemeUnderlineColor);  
     color: var(--SmartThemeBodyColor);       
     border-radius: 12px;
     font-size: 0.85em;
@@ -377,7 +377,7 @@
     height: 32px;
     border: 0;
     border-radius: 50%;
-    background: var(--SmartThemeUnderlineColor);
+    background: var(--SmartThemeBlurTintColor);
     color: var(--SmartThemeBodyColor);
     display: flex;
     align-items: center;
@@ -390,7 +390,7 @@
 }
 
 .wb-tag-add-mini:hover {
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
     color: var(--SmartThemeBodyColor);
 }
 
@@ -434,7 +434,7 @@
 }
 
 .wb-btn-primary {
-    background: var(--button-filled-brand-background);
+    background: var(--SmartThemeUnderlineColor);
     color: var(--SmartThemeBodyColor);
     opacity: 0.8;
 }
@@ -444,7 +444,7 @@
 }
 
 .wb-btn-secondary {
-    background: var(--SmartThemeUnderlineColor);
+    background: var(--SmartThemeBlurTintColor);
     color: var(--SmartThemeBodyColor);
     opacity: 0.8;
 }
